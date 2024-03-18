@@ -38,7 +38,6 @@ export const checkContactId = catchAsync(async (req, res, next) => {
   if (!isIdValid) throw HttpError(404, "Contact not found");
 
   const contactAlreadyExists = await Contact.exists({ _id: id });
-  // const userExists = await User.findById(id).select('_id');
 
   if (!contactAlreadyExists) throw HttpError(404, "Contact not found");
 
@@ -50,7 +49,6 @@ export const checkUpdateUserData = (req, res, next) => {
 
   if (error) throw HttpError(400, "Invalid user data");
 
-  // if (error) throw HttpError(400, "Invalid contact data");
   if (error) throw HttpError(400, error.message);
 
   req.body = value;
