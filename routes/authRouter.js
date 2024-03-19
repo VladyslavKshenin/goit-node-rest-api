@@ -12,6 +12,7 @@ import {
   register,
   updateSubscription,
   updateAvatar,
+  getAvatar,
 } from "../controllers/authControllers.js";
 import { upload } from "../midldlewars/uploadAvatar.js";
 
@@ -36,4 +37,5 @@ usersRouter.patch(
   upload.single("avatar"),
   updateAvatar
 );
+usersRouter.get("/avatars", getAvatar);
 export default usersRouter;

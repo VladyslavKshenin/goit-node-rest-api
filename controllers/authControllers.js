@@ -85,3 +85,8 @@ export const updateAvatar = catchAsync(async (req, res) => {
     avatarURL,
   });
 });
+export const getAvatar = catchAsync(async (req, res) => {
+  const { _id } = req.body;
+  const user = await User.findById(_id);
+  res.sendFile(path.join(process.cwd(), "public", user.avatarURL));
+});
