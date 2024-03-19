@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import Jimp from "jimp";
+import * as crypto from "node:crypto";
 
 import { catchAsync } from "../helpers/catchAsync.js";
 import {
@@ -65,12 +66,12 @@ export const updateAvatar = catchAsync(async (req, res) => {
   if (!req.file) {
     throw HttpError(400, "Avatar is required");
   }
-  // if (!id) {
-  //   throw HttpError(401, "Not authorized");
-  // }
-  const { path: tempUpload, originalname } = req.file;
 
-  const fileName = `${_id}_${originalname}`;
+  const { path: tempUpload, originalname } = req.file;
+  const prefix = crypto.randomUUID();
+
+  const fileName = `${prefix}_${originalname}`;
+
   const resultUpload = path.resolve(avatarsDir, fileName);
 
   const image = await Jimp.read(tempUpload);
