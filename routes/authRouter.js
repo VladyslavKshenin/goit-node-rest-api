@@ -11,7 +11,9 @@ import {
   logout,
   register,
   updateSubscription,
+  updateAvatar,
 } from "../controllers/authControllers.js";
+import { upload } from "../midldlewars/uploadAvatar.js";
 
 const usersRouter = express.Router();
 
@@ -26,5 +28,12 @@ usersRouter.patch(
   authenticate,
   updateSucSchemaMid,
   updateSubscription
+);
+
+usersRouter.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  updateAvatar
 );
 export default usersRouter;

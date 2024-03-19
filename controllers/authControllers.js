@@ -1,3 +1,7 @@
+import fs from "fs/promises";
+import path from "path";
+import Jimp from "jimp";
+
 import { catchAsync } from "../helpers/catchAsync.js";
 import {
   loginUserDB,
@@ -6,6 +10,9 @@ import {
   updateSubscriptionDB,
 } from "../services/userService.js";
 import { User } from "../models/userModel.js";
+import HttpError from "../helpers/HttpError.js";
+
+const avatarsDir = path.resolve("public", "avatars");
 
 export const register = catchAsync(async (req, res) => {
   const newUser = await registerUserDB(req.body);
@@ -51,3 +58,47 @@ export const updateSubscription = catchAsync(async (req, res) => {
 
   res.status(200).json(updatedUserSub);
 });
+
+export const updateAvatar = catchAsync(async (req, res) => {
+  const { _id } = req.user;
+
+  if (!req.file) {
+    throw HttpError(400, "Avatar is required");
+  }
+  // if (!id) {
+  //   throw HttpError(401, "Not authorized");
+  // }
+  const { path: tempUpload, originalname } = req.file;
+
+  const fileName = `${_id}_${originalname}`;
+  const resultUpload = path.resolve(avatarsDir, fileName);
+
+  const image = await Jimp.read(tempUpload);
+  image.resize(250, 250).write(tempUpload);
+  await fs.rename(tempUpload, resultUpload);
+
+  const avatarURL = path.join("avatars", fileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    avatarURL,
+  });
+});
+
+async function getAvatar(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (user === null) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    if (user.avatar === null) {
+      return res.status(404).send({ message: "Avatar not found" });
+    }
+
+    res.sendFile(path.join(process.cwd(), "public/avatars", user.avatar));
+  } catch (error) {
+    next(error);
+  }
+}
