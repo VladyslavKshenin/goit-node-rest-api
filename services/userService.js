@@ -4,6 +4,7 @@ import { User } from "../models/userModel.js";
 import { signToken } from "./jwtService.js";
 import { subscriptionTypes } from "../constants.js";
 import bcrypt from "bcrypt";
+import gravatar from "gravatar";
 
 export const getAllContactsDB = async (idOwner, pagination) => {
   const contacts = await Contact.find(idOwner, "", pagination);
@@ -53,10 +54,15 @@ export const updateContactDB = async (contactId, contactData, owner) => {
 
 // AUTH SERVER :
 export const registerUserDB = async (userData) => {
-  const { password } = userData;
+  const { password, email } = userData;
   const hassedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...userData, password: hassedPassword });
+  const avatarURL = gravatar.url(email);
+  const newUser = await User.create({
+    ...userData,
+    password: hassedPassword,
+    avatarURL,
+  });
 
   newUser.password = undefined;
 
