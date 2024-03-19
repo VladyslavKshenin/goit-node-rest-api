@@ -84,21 +84,3 @@ export const updateAvatar = catchAsync(async (req, res) => {
     avatarURL,
   });
 });
-
-async function getAvatar(req, res, next) {
-  try {
-    const user = await User.findById(req.user.id);
-
-    if (user === null) {
-      return res.status(404).send({ message: "User not found" });
-    }
-
-    if (user.avatar === null) {
-      return res.status(404).send({ message: "Avatar not found" });
-    }
-
-    res.sendFile(path.join(process.cwd(), "public/avatars", user.avatar));
-  } catch (error) {
-    next(error);
-  }
-}
