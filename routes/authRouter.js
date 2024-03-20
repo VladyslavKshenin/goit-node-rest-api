@@ -3,6 +3,7 @@ import {
   authenticate,
   checkLodinData,
   checkRegisterData,
+  emailSchemaMid,
   updateSucSchemaMid,
 } from "../midldlewars/authMiddlewars.js";
 import {
@@ -13,12 +14,16 @@ import {
   updateSubscription,
   updateAvatar,
   getAvatar,
+  resendVerifyEmail,
+  verifyEmail,
 } from "../controllers/authControllers.js";
 import { upload } from "../midldlewars/uploadAvatar.js";
 
 const usersRouter = express.Router();
 
 usersRouter.post("/register", checkRegisterData, register);
+usersRouter.get("/verify/:verificationToken", verifyEmail);
+usersRouter.post("/verify", emailSchemaMid, resendVerifyEmail);
 usersRouter.post("/login", checkLodinData, login);
 usersRouter.post("/logout", authenticate, logout);
 
