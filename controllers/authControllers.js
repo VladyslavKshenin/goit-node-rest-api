@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import fs from "fs/promises";
 import path from "path";
 import Jimp from "jimp";
@@ -12,6 +15,9 @@ import {
 } from "../services/userService.js";
 import { User } from "../models/userModel.js";
 import HttpError from "../helpers/HttpError.js";
+import { sendEmail } from "../helpers/sendEmail.js";
+
+const { BASE_URL } = process.env;
 
 const avatarsDir = path.resolve("public", "avatars");
 
@@ -24,6 +30,41 @@ export const register = catchAsync(async (req, res) => {
       subscription: newUser.subscription,
     },
   });
+});
+
+export const verifyEmail = catchAsync(async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: null,
+  });
+
+  res.json({ message: "Verification successful" });
+});
+
+export const resendVerifyEmail = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) throw HttpError(401, "Email not found");
+
+  if (user.verify) throw HttpError(400, "Verification has already been passed");
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify your email",
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click here to verify email</a>`,
+  };
+
+  await sendEmail(verifyEmail);
+
+  res.json({ message: "Verification email sent" });
 });
 
 export const login = catchAsync(async (req, res) => {
